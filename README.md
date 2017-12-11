@@ -1,6 +1,6 @@
 # This Post-commit hook is meant to confirm pairs.
 
-It assumes that all pairs have two initial handles.
+It assumes that all pairs in pair files only have two letter initials.
 
 Simply run it with npm start wire it in as a post commit hook.
 
