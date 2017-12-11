@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "To prompt a user that their pair is correct",
   "main": "index.js",
+  "bin": {
+    "pairs-hook": "./index.js"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "./index.js"
