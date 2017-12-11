@@ -1,0 +1,22 @@
+{
+  "name": "pairs-hook",
+  "version": "1.0.0",
+  "description": "To prompt a user that their pair is correct",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "./index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "my-fake-repo"
+  },
+  "author": "Eli Itah",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "2.3.0",
+    "inquirer": "4.0.1",
+    "minimist": "1.2.0",
+    "shelljs": "0.7.8"
+  }
+}
