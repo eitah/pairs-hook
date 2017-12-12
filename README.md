@@ -1,6 +1,7 @@
 # This Post-commit hook is meant to confirm pairs.
 
 Find me on NPM at https://www.npmjs.com/package/pairs-hook
+
 Find me on GIT at https://github.com/eitah/pairs-hook/
 
 It assumes that all pairs in pair files only have two letter initials.
