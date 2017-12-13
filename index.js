@@ -43,7 +43,7 @@ inquirer.prompt([
                         shell.echo(`\nGreat, ready to commit as ${getPair()}\n`);
                         const directions = chalk.cyan('Please copy the below into your command line');
                         shell.echo(directions);
-                        shell.echo('\ngit commit --amend --reset-author --no-edit -n\n');
+                        shell.echo('\ngit commit --amend --reset-author --no-edit -n\n'); // -n ensures git will not re-run your tests
                         shell.exit(0); // Success
                     } else {
                         console.log('\nSorry please enter a valid pair.');
