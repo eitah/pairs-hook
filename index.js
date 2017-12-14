@@ -60,8 +60,8 @@ async function executeHook() {
                     })
                         .then((answer) => {
                             if (answer.confirmPair) {
-                                shell.exec('\ngit commit --amend --reset-author --no-edit -n\n');
-                                shell.echo(`\nCommitted as ${currentPair}\n`);
+                                shell.echo('\nGreat copy the below into your terminal\n');
+                                shell.echo(chalk.cyan('git commit --amend --reset-author --no-edit -n\n'));
                                 shell.exit(0); // Success
                             } else {
                                 console.log('That\'s ok. Execute', chalk.cyan('npm run pairs-hook'), 'to try again.')
