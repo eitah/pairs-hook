@@ -31,7 +31,6 @@ let initialsInput = {
         const pass = initials.length === 1 || initials.length === 2; // if there is 1 or 2 sets of initials
         if (pass) {
             console.error('\n');
-            shell.exec(`git pair ${value}`);
             return true
         } else {
             console.log('\nSorry please enter valid initials.');
@@ -39,18 +38,7 @@ let initialsInput = {
     },
 };
 
-
-async function getHash() {
-    const hash = await shell.exec('git rev-parse --short --verify HEAD', {silent: true});
-    return hash.stdout.trim();
-}
-
 async function executeHook() {
-    lastHash = await getHash();
-    if (lastHash) {
-        console.error('last hash is', lastHash);
-    }
-
     inquirer.prompt(shouldICommitPrompt)
         .then((answer) => {
             if (answer.shouldICommit) {
@@ -58,10 +46,13 @@ async function executeHook() {
                 shell.exit(0); // Success
             }
             inquirer.prompt(initialsInput)
-                .then(() => {
+                .then((input) => {
+                    shell.exec(`git pair ${input.initials}`);
                     currentPair = getPair();
                     let modifier = (currentPair !== originalPair) ? 'set to' : 'remains';
                     shell.echo(`\nGit pair ${modifier} ${currentPair}\n`);
+                })
+                .then(() =>{
                     inquirer.prompt({
                         type: 'confirm',
                         name: 'confirmPair',
