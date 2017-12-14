@@ -10,7 +10,7 @@ function getPair() {
     return chalk.cyan(foo.split(':')[1].trim());
 }
 
-let originalPair, currentPair;
+let originalPair, currentPair, lastHash, currentHash;
 currentPair = originalPair = getPair();
 if (originalPair.split(' ').includes('and')) {
     currentPair = `pair ${currentPair}`;
@@ -39,32 +39,46 @@ let initialsInput = {
     },
 };
 
-// happy path
 
-inquirer.prompt(shouldICommitPrompt)
-    .then((answer) => {
-        if (answer.shouldICommit) {
-            console.error('Great!');
-            shell.exit(0); // Success
-        }
-        inquirer.prompt(initialsInput)
-            .then(() => {
-                currentPair = getPair();
-                let modifier = (currentPair !== originalPair) ? 'set to' : 'remains';
-                shell.echo(`\nGit pair ${modifier} ${currentPair}\n`);
-                inquirer.prompt({
-                    type: 'confirm',
-                    name: 'confirmPair',
-                    message: `Proceed with pair ${currentPair}?`,
-                })
-                    .then((answer) => {
-                        if (answer.confirmPair) {
-                            shell.exec('\ngit commit --amend --reset-author --no-edit -n\n');
-                            shell.echo(`\nCommitted as ${currentPair}\n`);
-                            shell.exit(0); // Success
-                        } else {
-                            console.log('That\'s ok. Execute', chalk.cyan('npm run pairs-hook'), 'to try again.')
-                        }
+async function getHash() {
+    const hash = await shell.exec('git rev-parse --short --verify HEAD', {silent: true});
+    return hash.stdout.trim();
+}
+
+async function executeHook() {
+    lastHash = await getHash();
+    if (lastHash) {
+        console.error('last hash is', lastHash);
+    }
+
+    inquirer.prompt(shouldICommitPrompt)
+        .then((answer) => {
+            if (answer.shouldICommit) {
+                console.error('Great!');
+                shell.exit(0); // Success
+            }
+            inquirer.prompt(initialsInput)
+                .then(() => {
+                    currentPair = getPair();
+                    let modifier = (currentPair !== originalPair) ? 'set to' : 'remains';
+                    shell.echo(`\nGit pair ${modifier} ${currentPair}\n`);
+                    inquirer.prompt({
+                        type: 'confirm',
+                        name: 'confirmPair',
+                        message: `Proceed with pair ${currentPair}?`,
                     })
-            })
-    });
+                        .then((answer) => {
+                            if (answer.confirmPair) {
+                                shell.exec('\ngit commit --amend --reset-author --no-edit -n\n');
+                                shell.echo(`\nCommitted as ${currentPair}\n`);
+                                shell.exit(0); // Success
+                            } else {
+                                console.log('That\'s ok. Execute', chalk.cyan('npm run pairs-hook'), 'to try again.')
+                            }
+                        })
+                })
+        });
+
+}
+
+executeHook();
