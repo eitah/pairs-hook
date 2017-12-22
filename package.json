@@ -1,6 +1,6 @@
 {
   "name": "pairs-hook",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "To prompt a user that their pair is correct",
   "main": "index.js",
   "bin": {
