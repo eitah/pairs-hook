@@ -10,15 +10,23 @@ function getPair() {
     return chalk.cyan(foo.split(':')[1].trim());
 }
 
-async function isNotCommitAmend() {
-    const gitDiff = await shell.exec('git diff --cached');
-    const isNotAmend = gitDiff.trim() === '';
-    console.error('isNotAmend', isNotAmend);
+async function isCommitAmend() {
+    const gitDiff = await shell.exec('git diff --cached', { silent: true });
+    return gitDiff.trim() === '';
 }
 
-isNotCommitAmend();
+async function isInteractiveRebase() {
+    const branchName = await shell.exec('git branch | grep "*" | sed "s/* //"')
+    return branchName === '(no branch)'
+}
 
-let originalPair, currentPair, lastHash, currentHash;
+async function shouldIRun() {
+    const isamend = await isCommitAmend();
+    const isIntRebase = await isInteractiveRebase();
+    return (!isamend || !isIntRebase); // neither interactive rebase nor commit amend
+}
+
+let originalPair, currentPair;
 currentPair = originalPair = getPair();
 if (originalPair.split(' ').includes('and')) {
     currentPair = `pair ${currentPair}`;
@@ -47,38 +55,35 @@ let initialsInput = {
 };
 
 async function executeHook() {
-    inquirer.prompt(shouldICommitPrompt)
-        .then((answer) => {
+    if (await shouldIRun()) {
+        inquirer.prompt(shouldICommitPrompt).then((answer) => {
             if (answer.shouldICommit) {
                 console.error('Great!');
                 shell.exit(0); // Success
             }
-            inquirer.prompt(initialsInput)
-                .then((input) => {
-                    shell.exec(`git pair ${input.initials}`);
-                    currentPair = getPair();
-                    let modifier = (currentPair !== originalPair) ? 'set to' : 'remains';
-                    shell.echo(`\nGit pair ${modifier} ${currentPair}\n`);
+            inquirer.prompt(initialsInput).then((input) => {
+                shell.exec(`git pair ${input.initials}`);
+                currentPair = getPair();
+                let modifier = (currentPair !== originalPair) ? 'set to' : 'remains';
+                shell.echo(`\nGit pair ${modifier} ${currentPair}\n`);
+            }).then(() => {
+                inquirer.prompt({
+                    type: 'confirm',
+                    name: 'confirmPair',
+                    message: `Proceed with pair ${currentPair}?`,
+                }).then((answer) => {
+                    if (answer.confirmPair) {
+                        const commitCommand = 'git commit --amend --reset-author --no-edit -n';
+                        shell.echo(chalk.cyan(`${commitCommand}\n`));
+                        shell.exec(commitCommand);
+                        shell.exit(0); // Success
+                    } else {
+                        console.log('That\'s ok. Execute', chalk.cyan('npm run pairs-hook'), 'to try again.')
+                    }
                 })
-                .then(() =>{
-                    inquirer.prompt({
-                        type: 'confirm',
-                        name: 'confirmPair',
-                        message: `Proceed with pair ${currentPair}?`,
-                    })
-                        .then((answer) => {
-                            if (answer.confirmPair) {
-                                const commitCommand = 'git commit --amend --reset-author --no-edit -n';
-                                shell.echo(chalk.cyan(`${commitCommand}\n`));
-                                shell.exec(commitCommand);
-                                shell.exit(0); // Success
-                            } else {
-                                console.log('That\'s ok. Execute', chalk.cyan('npm run pairs-hook'), 'to try again.')
-                            }
-                        })
-                })
+            })
         });
-
+    }
 }
 
 executeHook();
