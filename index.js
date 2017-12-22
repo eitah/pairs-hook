@@ -10,6 +10,14 @@ function getPair() {
     return chalk.cyan(foo.split(':')[1].trim());
 }
 
+async function isNotCommitAmend() {
+    const gitDiff = await shell.exec('git diff --cached');
+    const isNotAmend = gitDiff.trim() === '';
+    console.error('isNotAmend', isNotAmend);
+}
+
+isNotCommitAmend();
+
 let originalPair, currentPair, lastHash, currentHash;
 currentPair = originalPair = getPair();
 if (originalPair.split(' ').includes('and')) {
@@ -60,8 +68,9 @@ async function executeHook() {
                     })
                         .then((answer) => {
                             if (answer.confirmPair) {
-                                shell.echo('\nGreat copy the below into your terminal\n');
-                                shell.echo(chalk.cyan('git commit --amend --reset-author --no-edit -n\n'));
+                                const commitCommand = 'git commit --amend --reset-author --no-edit -n';
+                                shell.echo(chalk.cyan(`${commitCommand}\n`));
+                                shell.exec(commitCommand);
                                 shell.exit(0); // Success
                             } else {
                                 console.log('That\'s ok. Execute', chalk.cyan('npm run pairs-hook'), 'to try again.')
