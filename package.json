@@ -12,10 +12,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "my-fake-repo"
+    "url": "https://github.com/eitah/pairs-hook/"
   },
   "author": "Eli Itah",
   "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/eitah/pairs-hook/issues"
+  },
+  "homepage": "https://github.com/eitah/pairs-hook#readme",
   "dependencies": {
     "chalk": "2.3.0",
     "inquirer": "4.0.1",
